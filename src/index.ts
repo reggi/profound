@@ -155,11 +155,12 @@ function nest<T>(value: T): () => T {
 export function profound<A extends Profound.SingleArgFuncs, G, B extends (a: Profound.Callback.ObjReturn<A>) => G, C extends Profound.Params.Value<A>>(funcs: A, callback?: B) {
     function reduceObjectOfFuncs(funcs: any, input: any = {}) {
         if (!isPlainObject(input)) throw new Error('Needs to be plain object')
+        // console.log(input)
         const keys = Object.keys(funcs)
         return keys.reduce((acq: Profound.Func, key: string) => {
             return use(acq, (acqError, acqValue) => {
                 if (acqError) throw acqError
-                if (acqValue && acqValue[key]) return acqValue
+                if (acqValue && acqValue.hasOwnProperty(key)) return acqValue
                 const isProfound = Boolean(funcs[key] &&
                     funcs[key].isProfound &&
                     funcs[key].isProfound === profoundRef &&
@@ -187,8 +188,7 @@ export function profound<A extends Profound.SingleArgFuncs, G, B extends (a: Pro
         })(funcs, preInput)
     }
     // NOTE returns ([callbackValue, reduceObjectOfFuncsValues])
-    function pass(...preInput: any): any {
-        const prein = preInput[0] || {}
+    function pass(preInput: any): any {
         return use(reduceObjectOfFuncs, (err, input) => {
             if (err) throw err
             const keys = Object.keys(funcs)
@@ -197,11 +197,9 @@ export function profound<A extends Profound.SingleArgFuncs, G, B extends (a: Pro
                 if (err) throw err
                 return [callbackValue, input]
             })(input)
-        })(funcs, prein)
+        })(funcs, preInput)
     }
     profound.isProfound = profoundRef
     profound.pass = pass
     return profound
 }
-
-

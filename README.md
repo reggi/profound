@@ -1,4 +1,4 @@
-# `@reggi/profound`
+# `profound`
 
 `Profound` is a compostion / flow / pipe library written for typescript.
 
